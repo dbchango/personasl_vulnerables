@@ -14,7 +14,6 @@ class CreateScreen extends StatefulWidget {
 class _CreateScreenState extends State<CreateScreen> {
   final formKey = GlobalKey<FormState>();
   final _scaffoldKey = GlobalKey<ScaffoldState>();
-  TextEditingController _dateController = TextEditingController();
   DateTime selectedDate = DateTime.now();
   Person _person = new Person();
   @override
@@ -22,7 +21,7 @@ class _CreateScreenState extends State<CreateScreen> {
     return Scaffold(
       key: _scaffoldKey,
       body: Container(
-        padding: EdgeInsets.all(5),
+        padding: EdgeInsets.all(20),
         child: Form(
           key: formKey,
           child: ListView(
@@ -30,9 +29,10 @@ class _CreateScreenState extends State<CreateScreen> {
               _getCiField(),
               _getName(),
               _getLastName(),
-              _getBornDate(),
-              _getCheckBox(),
-              _getSubmitButton()
+              _getBornDate(context),
+              _getDesable(),
+              _getSubmitButton(),
+              
             ],
           ),
         ),
@@ -63,6 +63,10 @@ class _CreateScreenState extends State<CreateScreen> {
         }
       },
     );
+  }
+
+  Widget _getCalendarButton(BuildContext context){
+    return TextButton(onPressed: ()async{await showDateDialog(context); }, child: Icon(Icons.calendar_today));
   }
 
   Widget _getName(){
@@ -115,40 +119,36 @@ class _CreateScreenState extends State<CreateScreen> {
     );
   }
 
-  Widget _getBornDate(){
-    return TextFormField(
-      initialValue: _person.borndate,
-      decoration: InputDecoration(labelText: "Fecha de nacimiento", icon: Icon(Icons.calendar_today),),
-     
-      //keyboardType: TextInputType.datetime,
-      onChanged: (value) {
-        setState(() {
-          _person.borndate = value;
-        });
-        print(_person.borndate );
-      },
-      onSaved: (newValue) {
-        setState(() {
-          _person.borndate = newValue;
-        });
-      },
-      validator: (value) {
-      if (value.isEmpty)
-        return "No ha ingresado su fecha de nacimiento.";
-        return null;
-      },
+  Widget _getBornDate(BuildContext context){
+    return Row(
+      children: [
+        _getCalendarButton(context),
+        Text('${_person.borndate??''}')
+      ],
     );
   }
 
-  Widget _getCheckBox(){
-    return CheckboxListTile(
-      title: Text(''),
-      value: _person.disability??false,
+  Widget _getDesable(){
+    return TextFormField(
+      initialValue: _person.disability,
+      decoration: InputDecoration(labelText: "Discapacidad"),
+      maxLength: 40,
       onChanged: (value) {
         setState(() {
           _person.disability = value;
-          print(_person.toJson());
         });
+      },
+      onSaved: (newValue) {
+        setState(() {
+          _person.disability = newValue;
+        });
+      },
+      validator: (value) {
+        if (value.length < 2) {
+          return "No ha ingresado nada en este campo.";
+        } else {
+          return null; 
+        }
       },
     );
   }
@@ -163,21 +163,30 @@ class _CreateScreenState extends State<CreateScreen> {
             IconButton(
                 icon: Icon(Icons.send),
                 onPressed: () async {
-                  //if (!formKey.currentState.validate()) return;
+                  if (!formKey.currentState.validate()) return;
 
                   //Vincula el valor de las controles del formulario a los atributos del modelo
-                  //formKey.currentState.save();
+                  formKey.currentState.save();
 
                   //Llamamos al provider para guardar el viaje
-                  final personProvider = Provider.of<PersonProvider>(context);
-                  print(_person.toJson());
-                  print(personProvider.persons);
-
-                  //_person = await personProvider.addPerson(_person.name, _person.ci, _person.lastname, _person.borndate, _person.disability);
-                  
+                  final personProvider = Provider.of<PersonProvider>(context, listen: false);
+                  _person = await personProvider.addPerson(_person.name, _person.ci, _person.lastname, _person.borndate, _person.disability);
+                  print(_person.id);
+                  _scaffoldKey.currentState.showSnackBar(
+                    SnackBar(content: Text("Registro de: "+_person.name +" creado con el id "+ _person.id.toString()))
+                  );
                 })
           ],
         ));
+  }
+
+  Future<void> showDateDialog(BuildContext context) async {
+    final picked = await showDatePicker(context: context, initialDate: selectedDate, firstDate: DateTime(2001, 8), lastDate: DateTime(2101, 8));
+    if(picked!= null && picked != selectedDate)
+    setState(() {
+      selectedDate = picked;
+      _person.borndate = picked.toString();
+    });
   }
 
 }

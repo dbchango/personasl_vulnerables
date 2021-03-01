@@ -19,7 +19,7 @@ class Person {
     String name;
     String lastname;
     String borndate;
-    bool disability;
+    String disability;
 
     factory Person.fromJson(Map<String, dynamic> json) => Person(
         id: json["id"],

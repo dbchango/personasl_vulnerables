@@ -11,10 +11,9 @@ class DBProvider{
   DBProvider._();
 
   get database async {
-    if (_database != null){
-      _database = await initDB();
-      return _database;
-    }
+    if (_database != null) return _database;
+    _database = await initDB();
+    return _database;
   }
 
   Future<Database> initDB() async {
@@ -30,9 +29,8 @@ class DBProvider{
           name TEXT,
           lastname TEXT,
           borndate TEXT, 
-          disability INTEGER
+          disability TEXT
         )
-        
         '''
       );
     });
@@ -47,6 +45,7 @@ class DBProvider{
   Future<dynamic> list() async{
     final db = await database;
     final result = await db.query('Persons');
+    print(result);
     return result.isNotEmpty ? result.map((t)=> Person.fromJson(t)).toList()
     :[];
   }
