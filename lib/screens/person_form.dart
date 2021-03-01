@@ -29,6 +29,7 @@ class _CreateScreenState extends State<CreateScreen> {
               _getCiField(),
               _getName(),
               _getLastName(),
+              Text('Fecha de nacimiento: '),
               _getBornDate(context),
               _getDesable(),
               _getSubmitButton(),
@@ -66,7 +67,7 @@ class _CreateScreenState extends State<CreateScreen> {
   }
 
   Widget _getCalendarButton(BuildContext context){
-    return TextButton(onPressed: ()async{await showDateDialog(context); }, child: Icon(Icons.calendar_today));
+    return TextButton( onPressed: ()async{await showDateDialog(context); }, child: Card(elevation: 2.0, color: Theme.of(context).buttonColor, child: Container( width: 40, height: 40, child: Icon(Icons.calendar_today),),));
   }
 
   Widget _getName(){
@@ -122,6 +123,8 @@ class _CreateScreenState extends State<CreateScreen> {
   Widget _getBornDate(BuildContext context){
     return Row(
       children: [
+        
+        
         _getCalendarButton(context),
         Text('${_person.borndate??''}')
       ],

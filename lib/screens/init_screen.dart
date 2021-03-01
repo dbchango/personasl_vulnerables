@@ -45,7 +45,5 @@ class _InitScreenState extends State<InitScreen> {
             ));
   }
 
-  loadList() async{
-    
-  }
+
 }
